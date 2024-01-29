@@ -1,0 +1,255 @@
+---
+title: "DAT301 Lab2"
+output:
+  pdf_document: default
+  html_document: default
+date: "2024-01-28"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load Data
+
+```{r}
+library(ggplot2movies)
+data(movies)
+```
+
+## Load Packages
+
+```{r}
+library(ggplot2)
+library(dplyr)
+```
+
+## Load Data set
+
+```{r}
+head(movies)
+str(movies)
+```
+
+# What is the range of years of production of the movies of this data set?
+
+```{r}
+range(movies$year)
+```
+
+# What proportion of movies have their budget included in this data base, and what proportion doesn't? What are the top 5 most expensive movies in this data set?
+
+```{r}
+movies.with.budget = sum(!is.na(movies$budget))
+movies.without.budget = sum(is.na(movies$budget))
+total.movies = nrow(movies)
+budget.proportions = movies.with.budget / total.movies
+nobudget.proportions = movies.without.budget / total.movies
+
+top.5.expensive = head(movies[order(-movies$budget), ], 5)
+
+cat("Proportion of movies that have their budget included:", round(budget.proportions, 3))
+cat("\n\nProportion of movies that do not have their budget included:", round(nobudget.proportions, 3))
+cat("\n\nTop 5 Most Expensive Movies:\n")
+for (title in top.5.expensive$title) {
+  cat("• ", title, "\n", sep = "")
+}
+
+```
+
+# What are the top 5 longest movies?
+
+```{r}
+top.5.longest = head(movies[order(-movies$length), ], 5)
+cat("\nTop 5 Most Longest Movies:\n")
+for (title in top.5.longest$title) {
+  cat("• ", title, "\n", sep = "")
+}
+```
+
+# Of all short movies, which one is the shortest (in minutes)? Which one is the longest? How long are the shortest and the longest short movies?
+
+```{r}
+short.movies = movies[movies$Short == 1, ]
+
+shortest.short = which.min(short.movies$length)
+shortest.short.title = as.character(short.movies$title[shortest.short])
+shortest.short.time = min(short.movies$length)
+
+longest.short = which.max(short.movies$length)
+longest.short.title = as.character(short.movies$title[longest.short])
+longest.short.time = max(short.movies$length)
+
+cat('Shortest Movie:', shortest.short.title)
+cat('\nRun Time:', shortest.short.time, 'minute')
+cat('\n\nLongest Movie:', longest.short.title)
+cat('\nRun Time', longest.short.time, 'minutes')
+```
+
+# How many movies of each genre (action, animation, comedy, drama, documentary, romance, short) are there in this data base?
+
+```{r}
+Filtered.movies = subset(movies, Action == 1 | Comedy == 1 | 
+                           Drama == 1 | Documentary == 1 | Romance == 1)
+Genre.count = c(
+  Action = sum(Filtered.movies$Action),
+  Comedy = sum(Filtered.movies$Comedy), 
+  Drama = sum(Filtered.movies$Drama), 
+  Documentary = sum(Filtered.movies$Documentary),
+  Romance = sum(Filtered.movies$Romance)
+)
+
+barplot(Genre.count, main = 'Number of Movies by Genre', 
+        xlab = 'Genre', ylab = 'Number of Movies', 
+        col = 'coral', 
+        ylim = c(0, max(Genre.count) + 10), cex.names = 0.67)
+text(x = 1:length(Genre.count) , y = Genre.count - 1000, 
+     labels = Genre.count, cex = 0.9, col = "black", pos = 1)
+```
+
+# What is the average rating of all movies within each genre?
+
+```{r}
+Action.avg.rating = mean((movies %>% filter(Action == 1))$rating, na.rm = TRUE)
+Animation.avg.rating = mean((movies %>% filter(Animation == 1))$rating, na.rm = TRUE)
+Comedy.avg.rating = mean((movies %>% filter(Comedy == 1))$rating, na.rm = TRUE)
+Drama.avg.rating = mean((movies %>% filter(Drama == 1))$rating, na.rm = TRUE)
+Romance.avg.rating = mean((movies %>% filter(Romance == 1))$rating, na.rm = TRUE)
+Short.avg.rating = mean((movies %>% filter(Short == 1))$rating, na.rm = TRUE)
+
+avg.genre.ratings = c(Action = Action.avg.rating, 
+                      Animation = Animation.avg.rating,
+                      Comedy = Comedy.avg.rating, 
+                      Drama = Drama.avg.rating, 
+                      Romance = Romance.avg.rating,
+                      Short = Short.avg.rating)
+
+barplot(avg.genre.ratings, 
+        main = 'Average Rating by Genre', xlab = 'Genre', ylab = 'Average Raging', 
+        col = 'coral', ylim = c(0, max(avg.genre.ratings) + 1),
+        names.arg = names(avg.genre.ratings), cex.names = 0.67)
+text(x = 1:length(avg.genre.ratings) , y = avg.genre.ratings - 1, 
+     labels = round(avg.genre.ratings, 2), cex = 0.8, col = "black", pos = 3)
+
+```
+
+# What is the average rating of all movies within each genre that were produced in the years 2000-2005?
+
+```{r}
+Action.avg.rating.7 = mean((movies %>% filter(Action == 1 & 
+2000 <= year & year <= 2005))$rating, na.rm = TRUE)
+
+Animation.avg.rating.7 = mean((movies %>% filter(Animation == 1 & 
+2000 <= year & year <= 2005))$rating, na.rm = TRUE)
+
+Comedy.avg.rating.7 = mean((movies %>% filter(Comedy == 1 & 
+2000 <= year & year <= 2005))$rating, na.rm = TRUE)
+
+Drama.avg.rating.7 = mean((movies %>% filter(Drama == 1 & 
+2000 <= year & year <= 2005))$rating, na.rm = TRUE)
+
+Romance.avg.rating.7 = mean((movies %>% filter(Romance == 1 & 
+2000 <= year & year <= 2005))$rating, na.rm = TRUE)
+
+Short.avg.rating.7 = mean((movies %>% filter(Short == 1 & 
+2000 <= year & year <= 2005))$rating, na.rm = TRUE)
+
+
+avg.genre.ratings.7 = c(Action = Action.avg.rating.7, 
+                      Animation = Animation.avg.rating.7,
+                      Comedy = Comedy.avg.rating.7, 
+                      Drama = Drama.avg.rating.7, 
+                      Romance = Romance.avg.rating.7,
+                      Short = Short.avg.rating.7)
+
+barplot(avg.genre.ratings.7, 
+        main = 'Average Rating by Genre \n Produced 2000-2005', 
+        xlab = 'Genre', ylab = 'Average Raging', 
+        col = 'coral', ylim = c(0, max(avg.genre.ratings.7) + 1),
+        names.arg = names(avg.genre.ratings.7), cex.names = 0.67)
+text(x = 1:length(avg.genre.ratings.7) , y = avg.genre.ratings.7 - 1, 
+     labels = round(avg.genre.ratings.7, 2), cex = 0.99, col = "black", pos = 1)
+```
+
+# Movies Produced, 1990 - 2005
+
+```{r}
+Action.avg.rating.8 = movies %>% filter(Action == 1 & 
+1990 <= year & year <= max(year, na.rm = TRUE))
+
+Animation.avg.rating.8 = movies %>% filter(Animation == 1 & 
+1990 <= year & year <= max(year, na.rm = TRUE))
+
+Comedy.avg.rating.8 = movies %>% filter(Comedy == 1 & 
+1990 <= year & year <= max(year, na.rm = TRUE))
+
+Drama.avg.rating.8 = movies %>% filter(Drama == 1 & 
+1990 <= year & year <= max(year, na.rm = TRUE))
+
+Romance.avg.rating.8 = movies %>% filter(Romance == 1 & 
+1990 <= year & year <= max(year, na.rm = TRUE))
+
+Genre.movies.time = bind_rows(
+                      data.frame(Genre = 'Action', year = Action.avg.rating.8$year),
+                      data.frame(Genre = 'Animation',year =  Animation.avg.rating.8$year),
+                      data.frame(Genre = 'Comedy', year = Comedy.avg.rating.8$year),
+                      data.frame(Genre = 'Drama', year = Drama.avg.rating.8$year),
+                      data.frame(Genre = 'Romance', year = Romance.avg.rating.8$year)
+                )
+
+plot = ggplot(Genre.movies.time, aes(x = year, color = Genre)) + 
+  geom_line(stat = "count") +
+  labs(title = "Number of Movies Produced since 1990",
+       x = "Year", y = "Number of Movies", color = "Genre") +
+  theme_minimal() +
+  scale_color_brewer(palette = "Set1") +
+  theme(legend.position = "right")
+print(plot)
+```
+
+# How has the popularity of movie genres changed over the decades?
+
+By looking at the graph above, it becomes evident the gap between Comedy, Drama, and every other genre. At \~1996, Romance movies became more popular than Action films but both have declined \~2002, following the rest of the graphs pattern. Considering Comedy movies, they capped out at around \~600 movies being produced each year while Drama movies continued to grow. What is interesting is that although Drama movies continued to grow, them alongside all genres began to decline at \~2002 indicating an obstacle in the film industry. Further research is required to understand how this obstacle played a role.
+
+# What is the trend of average movie ratings over the years?
+
+```{r}
+avg.ratings.by.year = movies %>%
+  group_by(year) %>%
+  summarize(avg.rating = mean(rating, na.rm = TRUE))
+
+plot.9 = ggplot(avg.ratings.by.year, aes(x = year, y = avg.rating)) +
+  geom_line() +
+  labs(title = "9: Average Movie Ratings Over the Years",
+       x = "Year",
+       y = "Average Rating") +
+  theme_minimal()
+print(plot.9)
+```
+
+```{r}
+plot.9.1 = ggplot(movies, aes(x = year, y = budget)) +
+  geom_point() +
+  labs(title = "9.1: Relationship between Release Year and Movie Budget",
+       x = "Release Year",
+       y = "Budget") +
+  theme_minimal()
+print(plot.9.1)
+```
+
+As seen through graph 9, viewer sentiment was mixed and the data could be viewed as unreliable due to its extremities. Up until \~1930, the average movie rating was decreasing for an unknown reason that will consider further research. My guess is that this is when the film industry was just beginning to develop and new ideas were emerging/being tested. However, \~1990 average ratings began to plateau marking a critical point since average ratings increased from here. When comparing this with the budget for movies' release years, it is noticed that budgets increased exponentially around this same time. Therefore, it can be concluded that these increased budgets have caused average movie ratings to rise.
+
+# Is there a relationship between budgets and ratings?
+
+```{r}
+plot.10 = ggplot(movies, aes(x = budget, y = rating)) +
+  geom_point() + 
+  geom_smooth(method = 'lm', se = FALSE, color = 'red') + 
+  labs(title = "Relationship between Release Year and Movie Budget",
+       x = "Budget",
+       y = "Rating") +
+  theme_minimal()
+print(plot.10)
+```
+
+Yes! By comparing the budgets of movies to their rating, we notice through our trend line that as budgets increase, movies tend to have lower ratrings. However, this decrease in rating is not significant since our slope is very close to being neutral. If we look at the scatter plot itself, we notice that ratings cluster much more around the 7 are meaning that a big budget is not requierd to achieve this rating. Furthermore, it is noticed that the highest ratings are on the lower half of the budget, indicating that a movie does not need a budget of \$100,000,000 to achieve a high rating.
